@@ -1,0 +1,24 @@
+{
+  "name": "sai-synth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "synth.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicolas-van/sai-synth.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nicolas-van/sai-synth/issues"
+  },
+  "homepage": "https://github.com/nicolas-van/sai-synth#readme",
+  "dependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-less": "^1.3.0",
+    "grunt-contrib-watch": "^1.0.0"
+  }
+}

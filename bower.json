@@ -1,0 +1,24 @@
+{
+  "name": "sai-synth",
+  "homepage": "https://github.com/nicolas-van/sai-synth",
+  "authors": [
+    "Nicolas Vanhoren <nicolas.vanhoren@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "widget": "~1.0.0",
+    "lodash": "~4.13.1",
+    "nunjucks": "~2.4.2",
+    "bootstrap": "~3.3.6"
+  }
+}
