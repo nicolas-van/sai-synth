@@ -35,10 +35,14 @@ saisynth.Knob = class Knob extends widget.Widget {
         this._value = 0;
         this._min = 0;
         this._max = 10;
+        this._updatingPercent = false;
+        this._updatingValue = false;
         this.on({
-            "change:value": this.updateDisplay,
+            "change:value": this._valueChange,
+            "change:percent": this._percentChange,
+            "dom:mousedown": this._mouseDown,
         });
-        this.updateDisplay();
+        this._value = this._value;
     }
     get value() {
         return this._value;
@@ -63,12 +67,43 @@ saisynth.Knob = class Knob extends widget.Widget {
         this.trigger("change:max");
         this.value = this.value;
     }
-    updateDisplay() {
-        var percent = (this.value - this.min) / (this.max - this.min);
-        var minD = -135;
-        var maxD = 135;
-        var degs = (percent * (maxD - minD)) + minD;
-        this.el.querySelector(".knob-circle").style.transform = "rotate(" + degs + "deg)";
+    _valueChange() {
+        if (this._updatingPercent)
+            return;
+        this._updatingValue = true;
+        this.percent = (this.value - this.min) / (this.max - this.min);
+        this._updatingValue = false;
+    }
+    get percent() {
+        return this.__percent;
+    }
+    set percent(val) {
+        this.__percent = Math.min(Math.max(val, 0), 1);
+        this.trigger("change:percent");
+    }
+    _percentChange() {
+        var degrees = (this.percent * (135 * 2)) - 135;
+        this.el.querySelector(".knob-circle").style.transform = "rotate(" + degrees + "deg)";
+        if (this._updatingValue)
+            return;
+        this._updatingPercent = true;
+        this.value = (this.percent * (this.max - this.min)) + this.min;
+        this._updatingPercent = false;
+    }
+    _mouseDown(e) {
+        var mult = 0.005;
+        var percent = this.percent;
+        var initialX = e.screenX;
+        var initialY = e.screenY;
+        var moveCallback = function(e) {
+            this.percent = percent + ((e.screenX - initialX) * mult) + ((initialY - e.screenY) * mult);
+        }.bind(this);
+        var upCallback = function(e) {
+            window.removeEventListener("mousemove", moveCallback);
+            window.removeEventListener("mouseup", upCallback);
+        }.bind(this);
+        window.addEventListener("mousemove", moveCallback);
+        window.addEventListener("mouseup", upCallback);
     }
 }
 
