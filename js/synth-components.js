@@ -99,4 +99,164 @@ saisynth.Knob = class Knob extends widget.Widget {
     }
 }
 
+var hasTouch = function() {
+    return 'ontouchstart' in window;
+};
+
+saisynth.Keys = class Keys extends widget.Widget {
+    get className() { return "keys"; }
+    constructor(options) {
+        super();
+        this._options = _.defaults(options, {
+            width: 640,
+            height: 100,
+        });
+        this.fingers = {};
+        this.on({
+            "appendedToDom": this.apply,
+            "notePressed": function(e) {
+                this.notes[e.detail].addClass("pressed");
+            },
+            "noteReleased": function(e) {
+                this.notes[e.detail].removeClass("pressed");
+            },
+        });
+        if (hasTouch()) {
+            this.on({
+                "dom:touchstart .keyboad-overlay": this.calcTouch,
+                "dom:touchend .keyboad-overlay": this.calcTouch,
+                "dom:touchmove .keyboad-overlay": this.calcTouch,
+            });
+        } else {
+            this.on({
+                "dom:mousedown .keyboad-overlay": this.calcMouse,
+                "dom:mouseup .keyboad-overlay": this.calcMouse,
+                "dom:mouseenter .keyboad-overlay": this.calcMouse,
+                "dom:mouseout .keyboad-overlay": this.calcMouse,
+                "dom:mousemove .keyboad-overlay": this.calcMouse,
+            });
+        }
+    }
+    apply() {
+        var width = this._options.width;
+        var height = this._options.height;
+        this.el.style.width = "" + width + "px";
+        this.el.style.height = "" + height + "px";
+        var nbrWhite = 7 * 6;
+        var blackHProp = 0.6;
+        var blackWProp = 0.65;
+        var offset = 0;
+        var firstNote = 69 - 9 - (12 * 2);
+
+        var kwidth = width / nbrWhite;
+        var kheight = height;
+        var bkwidth = kwidth * blackWProp;
+        var bkheight = kheight * blackHProp;
+        var pos = 0;
+        var note = firstNote;
+        var blacks = [];
+        var whites = [];
+        this.notes = {};
+        _.each(_.range(nbrWhite), function(i) {
+            var k = $("<div></div>");
+            k.css("top", 0);
+            k.css("left", pos);
+            k.data("left", pos);
+            k.css("width", kwidth);
+            k.css("height", kheight);
+            k.addClass("white");
+            k.data("note", note);
+            if (note % 12 === (69 - 9) % 12) {
+                k.append($("<span></span>").text(Math.floor(note / 12) - 1));
+            }
+            $(this.el).append(k);
+            whites.push(k);
+            this.notes[note] = k;
+            note += 1;
+
+            if (_.includes([0, 1, 3, 4, 5], (i + offset) % 7)) {
+                k = $("<div></div>");
+                k.css("top", 0);
+                k.css("left", pos + kwidth - (bkwidth / 2));
+                k.data("left", pos + kwidth - (bkwidth / 2));
+                k.css("width", bkwidth);
+                k.css("height", bkheight);
+                k.addClass("black");
+                k.data("note", note);
+                $(this.el).append(k);
+                blacks.push(k);
+                this.notes[note] = k;
+                note += 1;
+            }
+
+            pos += kwidth;
+        }.bind(this));
+        this.keys = [].concat(blacks).concat(whites);
+        $(this.el).append($("<div></div>").addClass("keyboad-overlay"));
+    }
+    findNote(x, y) {
+        for (var i = 0; i < this.keys.length; i++) {
+            var k = this.keys[i];
+            if (x >= k.data("left") && x <= k.data("left") + k.outerWidth() &&
+                y >= 0 && y <= k.outerHeight())
+                return k.data("note");
+        }
+        return null;
+    }
+    finger(num) {
+        if (! (("" + num) in this.fingers)) {
+            this.fingers[num] = {current: null};
+        }
+        return this.fingers[num];
+    }
+    calcMouse(e) {
+        var finger = this.finger(0);
+        if ((e.type === "mouseout" || e.type === "mouseup") && finger.current !== null) {
+            this.trigger("noteReleased", finger.current);
+            finger.current = null;
+            return;
+        }
+        var note = this.findNote(e.offsetX, e.offsetY);
+        if (note === null)
+            return;
+        if (e.type === "mousedown" || (e.type === "mouseenter" && e.which === 1)) {
+            this.trigger("notePressed", note);
+            finger.current = note;
+        } else if (e.type === "mousemove") {
+            if (finger.current !== null && finger.current !== note) {
+                this.trigger("noteReleased", finger.current);
+                this.trigger("notePressed", note);
+                finger.current = note;
+            }
+        }
+    }
+    calcTouch(e) {
+        _.each(e.originalEvent.touches, _.bind(function(touch) {
+            var finger = this.finger(touch.identifier);
+            var top = $(this.el).offset().top;
+            var left = $(this.el).offset().left;
+            var x = touch.pageX - left;
+            var y = touch.pageY - top;
+            var note = this.findNote(x / pageScale, y / pageScale);
+            if (finger.current !== note) {
+                if (finger.current !== null)
+                    this.trigger("noteReleased", finger.current);
+                if (note !== null)
+                    this.trigger("notePressed", note);
+                finger.current = note;
+            }
+        }, this));
+        var touches = _.map(e.originalEvent.touches, function(touch) {
+            return "" + touch.identifier;
+        });
+        _.each(this.fingers, _.bind(function(finger, id) {
+            if (! _.contains(touches, id) && finger.current !== null) {
+                this.trigger("noteReleased", finger.current);
+                finger.current = null;
+            }
+        }, this));
+    }
+}
+
+
 })();
