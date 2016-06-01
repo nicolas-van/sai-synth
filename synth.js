@@ -17,6 +17,7 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         super();
         var knob = new saisynth.Knob();
         knob.value = 3;
+        knob.defaultValue = 5;
         knob.replace(this.el.querySelector(".test-knob"));
     }
 };
@@ -33,6 +34,7 @@ saisynth.Knob = class Knob extends widget.Widget {
     constructor(options) {
         super();
         this._value = 0;
+        this._defaultValue = 0;
         this._min = 0;
         this._max = 10;
         this._updatingPercent = false;
@@ -41,6 +43,7 @@ saisynth.Knob = class Knob extends widget.Widget {
             "change:value": this._valueChange,
             "change:percent": this._percentChange,
             "dom:mousedown": this._mouseDown,
+            "dom:dblclick": () => this.value = this.defaultValue,
         });
         this._value = this._value;
     }
@@ -50,6 +53,13 @@ saisynth.Knob = class Knob extends widget.Widget {
     set value(val) {
         this._value = Math.min(Math.max(val, this.min), this.max);
         this.trigger("change:value");
+    }
+    get defaultValue() {
+        return this._defaultValue;
+    }
+    set defaultValue(val) {
+        this._defaultValue = val;
+        this.trigger("change:defaultValue");
     }
     get min() {
         return this._min;
