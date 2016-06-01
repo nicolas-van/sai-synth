@@ -1,0 +1,78 @@
+
+.knob {
+    @knob-size: 50px;
+    @knob-border-width: 2px;
+    @knob-color: @brand-primary;
+    
+    width: @knob-size;
+    height: @knob-size;
+    display: inline-block;
+    position: relative;
+    
+    .knob-circle {
+        display: inline-block;
+        position: absolute;
+        width: @knob-size;
+        height: @knob-size;
+        border: @knob-border-width solid @knob-color;
+        border-radius: @knob-size / 2;
+    }
+    
+    .knob-bar {
+        margin-left: auto;
+        margin-right: auto;
+        width: @knob-border-width;
+        height: @knob-size / 2;
+        background-color: @knob-color;
+    }
+}
+
+.keys {
+    display: inline-block;
+    position: relative;
+    background-color: blue;
+    border: 1px solid lighten(#464545, 30%);
+    margin: 3px;
+    padding: 3px;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    
+    .white, .black {
+        position: absolute;
+        border: 1px solid black;
+        span {
+            position: absolute;
+            bottom: 0;
+            left: 5px;
+            pointer-events: none;
+        }
+    }
+    .white {
+        background-color: white;
+        z-index: 0;
+        &.pressed {
+            background-color: #9EDFFF;
+        }
+    }
+    .black {
+        background-color: black;
+        z-index: 1;
+        &.pressed {
+            background-color: #007DB9;
+        }
+    }
+    .keyboad-overlay {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        z-index: 2;
+        cursor: pointer;
+    }
+}
