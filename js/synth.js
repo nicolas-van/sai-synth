@@ -16,40 +16,7 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         `);
         
         this.audioCtx = new AudioContext();
-        var instrument = {
-            oscillators: [
-                {
-                    type: "sine",
-                    gain: 1,
-                    freqOsc: {
-                        type: "sine",
-                        amount: 0,
-                        frequency: 10,
-                    },
-                },
-            ],
-            filters: [
-                {
-                    type: "highpass",
-                    frequency: 0,
-                    gain: 0,
-                    q: 1000,
-                },
-            ],
-            attack: 0.05,
-            decay: 0.05,
-            sustainLevel: 0.5,
-            sustainTime: 0.2,
-            release: 0.1,
-            gain: 0.2,
-
-            noise: 0,
-            delay: 0,
-            delayTime: 0.3,
-            panAmount: 0,
-            panFrequency: 2,
-        };
-        this.track = new sai.Track(this.audioCtx, instrument);
+        this.track = new sai.Track(this.audioCtx);
         this.track.output.connect(this.audioCtx.destination);
         
         console.log("trying to get midi access");
@@ -63,48 +30,27 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
             console.log("listening on " + n + " MIDI inputs");
         }.bind(this));
         
-        var notes = {};
-        
-        var press = function(note) {
-            if (notes[note]) {
-                note.end();
-            }
-            notes[note] = this.track.playNote(note, null, false);
-        }.bind(this);
-        
-        var release = function(note) {
-            if (notes[note]) {
-                notes[note].end();
-                notes[note] = undefined;
-            }
-        }.bind(this);
-        
         var receiveMessage = function(message) {
-            console.log(message);
-            var data = message.data;
-            var info = {
-                cmd: data[0] >> 4,
-                channel: data[0] & 0xf,
-                type: data[0] & 0xf0,
-                note: data[1],
-                velocity: data[2],
-            };
+            var mes = new sai.MidiMessage(message.data);
+            console.log("midi message", mes.cmdString, mes);
             
-            if (info.type === 144) {
-                press(info.note);
-            } else if (info.type === 128) {
-                release(info.note);
-            }
+            this.track.midiMessage(mes);
         }.bind(this);
         
         this.keys = new saisynth.Keys().appendTo(this.el);
         
         this.keys.on({
             "notePressed": function(e) {
-                press(e.detail);
+                var mes = new sai.MidiMessage();
+                mes.cmd = sai.MidiMessage.commands.noteOn;
+                mes.note = e.detail;
+                this.track.midiMessage(mes);
             }.bind(this),
             "noteReleased": function(e) {
-                release(e.detail);
+                var mes = new sai.MidiMessage();
+                mes.cmd = sai.MidiMessage.commands.noteOff;
+                mes.note = e.detail;
+                this.track.midiMessage(mes);
             }.bind(this),
         });
     }
