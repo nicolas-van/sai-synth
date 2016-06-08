@@ -114,12 +114,7 @@ saisynth.Keys = class Keys extends widget.Widget {
         this.fingers = {};
         this.on({
             "appendedToDom": this.apply,
-            "notePressed": function(e) {
-                this.notes[e.detail].addClass("pressed");
-            },
-            "noteReleased": function(e) {
-                this.notes[e.detail].removeClass("pressed");
-            },
+            "midiMessage": (e) => this.receiveMidiMessage(e.detail),
         });
         if (hasTouch()) {
             this.on({
@@ -212,7 +207,7 @@ saisynth.Keys = class Keys extends widget.Widget {
     calcMouse(e) {
         var finger = this.finger(0);
         if ((e.type === "mouseout" || e.type === "mouseup") && finger.current !== null) {
-            this.trigger("noteReleased", finger.current);
+            this._noteReleased(finger.current);
             finger.current = null;
             return;
         }
@@ -220,12 +215,12 @@ saisynth.Keys = class Keys extends widget.Widget {
         if (note === null)
             return;
         if (e.type === "mousedown" || (e.type === "mouseenter" && e.which === 1)) {
-            this.trigger("notePressed", note);
+            this._notePressed(note);
             finger.current = note;
         } else if (e.type === "mousemove") {
             if (finger.current !== null && finger.current !== note) {
-                this.trigger("noteReleased", finger.current);
-                this.trigger("notePressed", note);
+                this._noteReleased(finger.current);
+                this._notePressed(note);
                 finger.current = note;
             }
         }
@@ -240,9 +235,9 @@ saisynth.Keys = class Keys extends widget.Widget {
             var note = this.findNote(x / pageScale, y / pageScale);
             if (finger.current !== note) {
                 if (finger.current !== null)
-                    this.trigger("noteReleased", finger.current);
+                    this._noteReleased(finger.current);
                 if (note !== null)
-                    this.trigger("notePressed", note);
+                    this._notePressed(note);
                 finger.current = note;
             }
         }, this));
@@ -251,10 +246,32 @@ saisynth.Keys = class Keys extends widget.Widget {
         });
         _.each(this.fingers, _.bind(function(finger, id) {
             if (! _.contains(touches, id) && finger.current !== null) {
-                this.trigger("noteReleased", finger.current);
+                this._noteReleased(finger.current);
                 finger.current = null;
             }
         }, this));
+    }
+    _notePressed(note) {
+        var mes = new sai.MidiMessage();
+        mes.cmd = sai.MidiMessage.commands.noteOn;
+        mes.note = note;
+        mes.velocity = 127;
+        this.trigger("midiMessage", mes);
+    }
+    _noteReleased(note) {
+        var mes = new sai.MidiMessage();
+        mes.cmd = sai.MidiMessage.commands.noteOff;
+        mes.note = note;
+        this.trigger("midiMessage", mes);
+    }
+    receiveMidiMessage(mes) {
+        if (mes.cmd === sai.MidiMessage.commands.noteOn) {
+            if (this.notes[mes.note])
+                this.notes[mes.note].addClass("pressed");
+        } else if (mes.cmd === sai.MidiMessage.commands.noteOff) {
+            if (this.notes[mes.note])
+                this.notes[mes.note].removeClass("pressed");
+        }
     }
 }
 

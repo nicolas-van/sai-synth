@@ -13,7 +13,7 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         super();
         this.el.innerHTML = tenv.renderString(`
             <div class="osc1">
-                <div class="osc1-gain">
+                <div class="knob-label osc1-gain">
                     <div class="knob-ctn"></div>
                     <label>Gain</label>
                 </div>
@@ -27,41 +27,28 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.osc1Gain = new saisynth.Knob();
         this.osc1Gain.appendTo(this.el.querySelector(".osc1-gain .knob-ctn"));
         
+        var receiveMessage = function(mes) {
+            console.log("midi message", mes.cmdString, mes);
+            this.track.midiMessage(mes);
+            this.keys.receiveMidiMessage(mes);
+        }.bind(this);
+        
         console.log("trying to get midi access");
         window.navigator.requestMIDIAccess().then(function(midiAccess) {
             var inputs = midiAccess.inputs.values();
             var n = 0;
             for (var input = inputs.next(); input && ! input.done; input = inputs.next()) {
-                input.value.onmidimessage = receiveMessage;
+                input.value.onmidimessage = (message) => receiveMessage(new sai.MidiMessage(message.data));
                 n++;
             }
             console.log("listening on " + n + " MIDI inputs");
         }.bind(this));
         
-        var receiveMessage = function(message) {
-            var mes = new sai.MidiMessage(message.data);
-            console.log("midi message", mes.cmdString, mes);
-            
-            this.track.midiMessage(mes);
-        }.bind(this);
-        
+        // creation of virtual keyboard
         this.keys = new saisynth.Keys().appendTo(this.el);
-        
-        this.keys.on({
-            "notePressed": function(e) {
-                var mes = new sai.MidiMessage();
-                mes.cmd = sai.MidiMessage.commands.noteOn;
-                mes.note = e.detail;
-                mes.velocity = 127;
-                this.track.midiMessage(mes);
-            }.bind(this),
-            "noteReleased": function(e) {
-                var mes = new sai.MidiMessage();
-                mes.cmd = sai.MidiMessage.commands.noteOff;
-                mes.note = e.detail;
-                this.track.midiMessage(mes);
-            }.bind(this),
-        });
+        this.keys.on("midiMessage", function(e) {
+            receiveMessage(e.detail);
+        }.bind(this));
     }
 };
 
