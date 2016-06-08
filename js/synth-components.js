@@ -13,12 +13,12 @@ saisynth.Knob = class Knob extends widget.Widget {
             </div>
         `);
     }
-    constructor(options) {
+    constructor(defaultValue, min, max) {
         super();
-        this._value = 0;
-        this._defaultValue = 0;
-        this._min = 0;
-        this._max = 1;
+        this._value = defaultValue === undefined ? 0 : defaultValue;
+        this._defaultValue = defaultValue === undefined ? 0 : defaultValue;
+        this._min = min === undefined ? 0 : min;
+        this._max = max === undefined ? 1 : max;
         this._updatingPercent = false;
         this._updatingValue = false;
         this.on({

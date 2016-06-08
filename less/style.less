@@ -23,7 +23,20 @@
     
     .knob-label {
         display: inline-block;
-        text-align-center;
+        text-align: center;
+    }
+    
+    .osc-select {
+        button {
+            &:active, &:hover, &:focus, &:visited {
+                background-color: @btn-default-bg !important;
+                border-color: @btn-default-border !important;
+                outline: none !important;
+            }
+            &.selected {
+                background-color: @btn-primary-bg !important;
+            }
+        }
     }
     
     .osc1 {
