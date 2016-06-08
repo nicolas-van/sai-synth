@@ -18,7 +18,7 @@ saisynth.Knob = class Knob extends widget.Widget {
         this._value = 0;
         this._defaultValue = 0;
         this._min = 0;
-        this._max = 10;
+        this._max = 1;
         this._updatingPercent = false;
         this._updatingValue = false;
         this.on({
@@ -27,7 +27,7 @@ saisynth.Knob = class Knob extends widget.Widget {
             "dom:mousedown": this._mouseDown,
             "dom:dblclick": () => this.value = this.defaultValue,
         });
-        this._value = this._value;
+        this.value = this._value;
     }
     get value() {
         return this._value;

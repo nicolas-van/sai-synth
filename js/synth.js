@@ -12,12 +12,20 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
     constructor() {
         super();
         this.el.innerHTML = tenv.renderString(`
-            <div>Play using a MIDI keyboard</div>
+            <div class="osc1">
+                <div class="osc1-gain">
+                    <div class="knob-ctn"></div>
+                    <label>Gain</label>
+                </div>
+            </div>
         `);
         
         this.audioCtx = new AudioContext();
         this.track = new sai.Track(this.audioCtx);
         this.track.output.connect(this.audioCtx.destination);
+        
+        this.osc1Gain = new saisynth.Knob();
+        this.osc1Gain.appendTo(this.el.querySelector(".osc1-gain .knob-ctn"));
         
         console.log("trying to get midi access");
         window.navigator.requestMIDIAccess().then(function(midiAccess) {
@@ -44,6 +52,7 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
                 var mes = new sai.MidiMessage();
                 mes.cmd = sai.MidiMessage.commands.noteOn;
                 mes.note = e.detail;
+                mes.velocity = 127;
                 this.track.midiMessage(mes);
             }.bind(this),
             "noteReleased": function(e) {
