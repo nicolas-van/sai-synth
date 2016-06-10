@@ -51,9 +51,14 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.audioCtx = new AudioContext();
         this.track = new sai.Track(this.audioCtx);
         this.track.output.connect(this.audioCtx.destination);
+        this.track.attack = 0.1;
+        this.track.decay = 2;
+        this.track.sustain = 0;
+        this.track.release = 0.3;
         
         // osc1
-        this.osc1Gain = new saisynth.Knob(this.track.osc1Gain).appendTo(this.el.querySelector(".osc1-gain .knob-ctn"));
+        this.osc1Gain = new saisynth.Knob(this.track.osc1Gain, 0, 1, "exponential").
+            appendTo(this.el.querySelector(".osc1-gain .knob-ctn"));
         this.osc1Gain.on("change:value", () => this.track.osc1Gain = this.osc1Gain.value);
         this.osc1Type = new saisynth.ButtonSelect([["sine", "sine"], 
             ["square", "square"],
@@ -63,7 +68,8 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.osc1Type.on("change:value", () => this.track.osc1Type = this.osc1Type.value);
         
         // osc2
-        this.osc2Gain = new saisynth.Knob(this.track.osc2Gain).appendTo(this.el.querySelector(".osc2-gain .knob-ctn"));
+        this.osc2Gain = new saisynth.Knob(this.track.osc2Gain, 0, 1, "exponential").
+            appendTo(this.el.querySelector(".osc2-gain .knob-ctn"));
         this.osc2Gain.on("change:value", () => this.track.osc2Gain = this.osc2Gain.value);
         this.osc2Type = new saisynth.ButtonSelect([["sine", "sine"], 
             ["square", "square"],
@@ -73,16 +79,16 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.osc2Type.on("change:value", () => this.track.osc2Type = this.osc2Type.value);
         
         // envelope
-        this.attack = new saisynth.Knob(this.track.attack, 0, 10).
+        this.attack = new saisynth.Knob(this.track.attack, 0, 10, "exponential").
             appendTo(this.el.querySelector(".attack .knob-ctn"));
         this.attack.on("change:value", () => this.track.attack = this.attack.value);
-        this.decay = new saisynth.Knob(this.track.decay, 0, 10).
+        this.decay = new saisynth.Knob(this.track.decay, 0, 10, "exponential").
             appendTo(this.el.querySelector(".decay .knob-ctn"));
         this.decay.on("change:value", () => this.track.decay = this.decay.value);
-        this.sustain = new saisynth.Knob(this.track.sustain, 0, 1).
+        this.sustain = new saisynth.Knob(this.track.sustain, 0, 1, "exponential").
             appendTo(this.el.querySelector(".sustain .knob-ctn"));
         this.sustain.on("change:value", () => this.track.sustain = this.sustain.value);
-        this.release = new saisynth.Knob(this.track.release, 0, 10).
+        this.release = new saisynth.Knob(this.track.release, 0, 10, "exponential").
             appendTo(this.el.querySelector(".release .knob-ctn"));
         this.release.on("change:value", () => this.track.release = this.release.value);
         

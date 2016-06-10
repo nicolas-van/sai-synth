@@ -13,17 +13,18 @@ saisynth.Knob = class Knob extends widget.Widget {
             </div>
         `);
     }
-    constructor(defaultValue, min, max) {
+    constructor(defaultValue, min, max, mode) {
         super();
         this._value = defaultValue === undefined ? 0 : defaultValue;
         this._defaultValue = defaultValue === undefined ? 0 : defaultValue;
         this._min = min === undefined ? 0 : min;
         this._max = max === undefined ? 1 : max;
-        this._updatingPercent = false;
+        this._mode = mode === undefined ? "normal" : mode;
+        this._updatingIValue = false;
         this._updatingValue = false;
         this.on({
             "change:value": this._valueChange,
-            "change:percent": this._percentChange,
+            "change:iValue": this._iValueChange,
             "dom:mousedown": this._mouseDown,
             "dom:dblclick": () => this.value = this.defaultValue,
         });
@@ -59,36 +60,47 @@ saisynth.Knob = class Knob extends widget.Widget {
         this.trigger("change:max");
         this.value = this.value;
     }
+    get mode() {
+        return this._mode;
+    }
+    set mode(val) {
+        this._mode = val;
+        this.trigger("change:mode");
+        this.value = this.value;
+    }
     _valueChange() {
-        if (this._updatingPercent)
+        if (this._updatingIValue)
             return;
         this._updatingValue = true;
-        this.percent = (this.value - this.min) / (this.max - this.min);
+        this.iValue = (this.value - this.min) / (this.max - this.min);
         this._updatingValue = false;
     }
-    get percent() {
-        return this.__percent;
+    get iValue() {
+        return this.__iValue;
     }
-    set percent(val) {
-        this.__percent = Math.min(Math.max(val, 0), 1);
-        this.trigger("change:percent");
+    set iValue(val) {
+        this.__iValue = Math.min(Math.max(val, 0), 1);
+        this.trigger("change:iValue");
     }
-    _percentChange() {
-        var degrees = (this.percent * (135 * 2)) - 135;
+    _iValueChange() {
+        var degrees = (this.iValue * (135 * 2)) - 135;
         this.el.querySelector(".knob-circle").style.transform = "rotate(" + degrees + "deg)";
         if (this._updatingValue)
             return;
-        this._updatingPercent = true;
-        this.value = (this.percent * (this.max - this.min)) + this.min;
-        this._updatingPercent = false;
+        this._updatingIValue = true;
+        var val = this.iValue;
+        if (this.mode === "exponential")
+            val = Math.pow(val, 2);
+        this.value = (this.iValue * (this.max - this.min)) + this.min;
+        this._updatingIValue = false;
     }
     _mouseDown(e) {
         var mult = 0.005;
-        var percent = this.percent;
+        var iValue = this.iValue;
         var initialX = e.screenX;
         var initialY = e.screenY;
         var moveCallback = function(e) {
-            this.percent = percent + ((e.screenX - initialX) * mult) + ((initialY - e.screenY) * mult);
+            this.iValue = iValue + ((e.screenX - initialX) * mult) + ((initialY - e.screenY) * mult);
         }.bind(this);
         var upCallback = function(e) {
             window.removeEventListener("mousemove", moveCallback);
