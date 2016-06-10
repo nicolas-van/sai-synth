@@ -114,7 +114,6 @@ saisynth.Keys = class Keys extends widget.Widget {
         this.fingers = {};
         this.on({
             "appendedToDom": this.apply,
-            "midiMessage": (e) => this.receiveMidiMessage(e.detail),
         });
         if (hasTouch()) {
             this.on({

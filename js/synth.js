@@ -78,22 +78,53 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
             this.keys.receiveMidiMessage(mes);
         }.bind(this);
         
-        console.log("trying to get midi access");
-        window.navigator.requestMIDIAccess().then(function(midiAccess) {
-            var inputs = midiAccess.inputs.values();
-            var n = 0;
-            for (var input = inputs.next(); input && ! input.done; input = inputs.next()) {
-                input.value.onmidimessage = (message) => receiveMessage(new sai.MidiMessage(message.data));
-                n++;
-            }
-            console.log("listening on " + n + " MIDI inputs");
-        }.bind(this));
+        this.midiReceiver = new saisynth.MidiReceiver();
+        this.midiReceiver.parent = this;
+        this.midiReceiver.on("midiMessage", (e) => receiveMessage(e.detail));
         
         // creation of virtual keyboard
         this.keys = new saisynth.Keys().appendTo(this.el);
-        this.keys.on("midiMessage", function(e) {
-            receiveMessage(e.detail);
+        this.keys.on("midiMessage", (e) => receiveMessage(e.detail));
+    }
+};
+
+saisynth.MidiReceiver = class MidiReceiver extends widget.EventDispatcher {
+    constructor() {
+        super();
+        this._register();
+        this._listening = {};
+    }
+    _register() {
+        window.navigator.requestMIDIAccess().then(function(midiAccess) {
+            if (this.destroyed)
+                return;
+            var inputs = midiAccess.inputs.values();
+            var ids = [];
+            for (var input = inputs.next(); input && ! input.done; input = inputs.next()) {
+                var midiInput = input.value;
+                ids.push(midiInput.id);
+                if (this._listening[midiInput.id])
+                    continue;
+                var receive = (message) => this.trigger("midiMessage", new sai.MidiMessage(message.data));
+                midiInput.addEventListener("midimessage", receive);
+                this._listening[midiInput.id] = [midiInput, receive];
+                console.log("listening on MIDI input " + midiInput.id);
+            }
+            _.each(_.clone(this._listening), function(val, key) {
+                if (_.includes(ids, key))
+                    return;
+                this._listening[key][0].removeEventListener("midimessage", this._listening[key][1]);
+                delete this._listening[key];
+                console.log("stopping to listen on Midi input " + key);
+            }.bind(this));
+            setTimeout(this._register.bind(this), 1000);
         }.bind(this));
+    }
+    destroy() {
+        _.each(this._listening, function(val, key) {
+            val[0].removeEventListener("midimessage", val[1]);
+        });
+        super.destroy();
     }
 };
 
