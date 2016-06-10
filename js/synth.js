@@ -46,6 +46,20 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
                     <label>Release</label>
                 </div>
             </div>
+            <div class="lfo">
+                <div class="lfo-freq knob-label">
+                    <div class="knob-ctn"></div>
+                    <label>LFO F.</label>
+                </div>
+                <div class="lfo-osc1-gain knob-label">
+                    <div class="knob-ctn"></div>
+                    <label>Osc1 Gain</label>
+                </div>
+                <div class="lfo-osc2-gain knob-label">
+                    <div class="knob-ctn"></div>
+                    <label>Osc2Gain</label>
+                </div>
+            </div>
             <div class="general">
                 <div class="gain knob-label">
                     <div class="knob-ctn"></div>
@@ -97,6 +111,17 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.release = new saisynth.Knob(this.track.release, 0.01, 10, "exponential").
             appendTo(this.el.querySelector(".release .knob-ctn"));
         this.release.on("change:value", () => this.track.release = this.release.value);
+        
+        // lfo
+        this.lfoFrequency = new saisynth.Knob(this.track.lfoFrequency, 0.10, 20, "exponential").
+            appendTo(this.el.querySelector(".lfo-freq .knob-ctn"));
+        this.lfoFrequency.on("change:value", () => this.track.lfoFrequency = this.lfoFrequency.value);
+        this.lfoOsc1Gain = new saisynth.Knob(this.track.lfoOsc1Gain, 0, 400, "exponential").
+            appendTo(this.el.querySelector(".lfo-osc1-gain .knob-ctn"));
+        this.lfoOsc1Gain.on("change:value", () => this.track.lfoOsc1Gain = this.lfoOsc1Gain.value);
+        this.lfoOsc2Gain = new saisynth.Knob(this.track.lfoOsc2Gain, 0, 400, "exponential").
+            appendTo(this.el.querySelector(".lfo-osc2-gain .knob-ctn"));
+        this.lfoOsc2Gain.on("change:value", () => this.track.lfoOsc2Gain = this.lfoOsc2Gain.value);
         
         // gain
         this.gain = new saisynth.Knob(this.track.gain, 0, 8, "exponential").
