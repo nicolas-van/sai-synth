@@ -28,6 +28,24 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
                     <label>Gain</label>
                 </div>
             </div>
+            <div class="envelope">
+                <div class="attack knob-label">
+                    <div class="knob-ctn"></div>
+                    <label>Attack</label>
+                </div>
+                <div class="decay knob-label">
+                    <div class="knob-ctn"></div>
+                    <label>Decay</label>
+                </div>
+                <div class="sustain knob-label">
+                    <div class="knob-ctn"></div>
+                    <label>Sustain</label>
+                </div>
+                <div class="release knob-label">
+                    <div class="knob-ctn"></div>
+                    <label>Release</label>
+                </div>
+            </div>
         `);
         
         this.audioCtx = new AudioContext();
@@ -53,6 +71,20 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
             ["sawtooth", "sawtooth"],
             ["noise", "noise"]]).appendTo(this.el.querySelector(".osc2-type"));
         this.osc2Type.on("change:value", () => this.track.osc2Type = this.osc2Type.value);
+        
+        // envelope
+        this.attack = new saisynth.Knob(this.track.attack, 0, 10).
+            appendTo(this.el.querySelector(".attack .knob-ctn"));
+        this.attack.on("change:value", () => this.track.attack = this.attack.value);
+        this.decay = new saisynth.Knob(this.track.decay, 0, 10).
+            appendTo(this.el.querySelector(".decay .knob-ctn"));
+        this.decay.on("change:value", () => this.track.decay = this.decay.value);
+        this.sustain = new saisynth.Knob(this.track.sustain, 0, 1).
+            appendTo(this.el.querySelector(".sustain .knob-ctn"));
+        this.sustain.on("change:value", () => this.track.sustain = this.sustain.value);
+        this.release = new saisynth.Knob(this.track.release, 0, 10).
+            appendTo(this.el.querySelector(".release .knob-ctn"));
+        this.release.on("change:value", () => this.track.release = this.release.value);
         
         var receiveMessage = function(mes) {
             console.log("midi message", mes.cmdString, mes);
