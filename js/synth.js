@@ -13,26 +13,16 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         super();
         this.el.innerHTML = tenv.renderString(`
             <div class="osc1">
-                <div class="osc1-type osc-select btn-group" role="group">
-                    <button type="button" class="btn btn-default" data-value="sine">sine</button>
-                    <button type="button" class="btn btn-default" data-value="square">square</button>
-                    <button type="button" class="btn btn-default" data-value="triangle">triangle</button>
-                    <button type="button" class="btn btn-default" data-value="sawtooth">sawtooth</button>
-                    <button type="button" class="btn btn-default" data-value="noise">noise</button>
-                </div>
+                <span class="osc1-type">
+                </span>
                 <div class="osc1-gain knob-label">
                     <div class="knob-ctn"></div>
                     <label>Gain</label>
                 </div>
             </div>
             <div class="osc2">
-                <div class="osc2-type osc-select btn-group" role="group">
-                    <button type="button" class="btn btn-default" data-value="sine">sine</button>
-                    <button type="button" class="btn btn-default" data-value="square">square</button>
-                    <button type="button" class="btn btn-default" data-value="triangle">triangle</button>
-                    <button type="button" class="btn btn-default" data-value="sawtooth">sawtooth</button>
-                    <button type="button" class="btn btn-default" data-value="noise">noise</button>
-                </div>
+                <span class="osc2-type">
+                </span>
                 <div class="osc2-gain knob-label">
                     <div class="knob-ctn"></div>
                     <label>Gain</label>
@@ -45,37 +35,29 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.track.output.connect(this.audioCtx.destination);
         
         // osc1
-        this.osc1Gain = new saisynth.Knob(this.track.osc1Gain);
-        this.osc1Gain.appendTo(this.el.querySelector(".osc1-gain .knob-ctn"));
+        this.osc1Gain = new saisynth.Knob(this.track.osc1Gain).appendTo(this.el.querySelector(".osc1-gain .knob-ctn"));
         this.osc1Gain.on("change:value", () => this.track.osc1Gain = this.osc1Gain.value);
-        var actOsc1Val = function() {
-            this.el.querySelectorAll(".osc1-type button").forEach((el) => el.classList.remove("selected"));
-            this.el.querySelector(".osc1-type button[data-value='" + this.track.osc1Type + "']").classList.add("selected");
-        }.bind(this);
-        this.on("dom:click .osc1-type button", function(e) {
-            this.track.osc1Type = e.target.dataset.value;
-            actOsc1Val();
-        }.bind(this));
-        actOsc1Val();
+        this.osc1Type = new saisynth.ButtonSelect([["sine", "sine"], 
+            ["square", "square"],
+            ["triangle", "triangle"],
+            ["sawtooth", "sawtooth"],
+            ["noise", "noise"]]).appendTo(this.el.querySelector(".osc1-type"));
+        this.osc1Type.on("change:value", () => this.track.osc1Type = this.osc1Type.value);
         
         // osc2
-        this.osc2Gain = new saisynth.Knob(this.track.osc2Gain);
-        this.osc2Gain.appendTo(this.el.querySelector(".osc2-gain .knob-ctn"));
+        this.osc2Gain = new saisynth.Knob(this.track.osc2Gain).appendTo(this.el.querySelector(".osc2-gain .knob-ctn"));
         this.osc2Gain.on("change:value", () => this.track.osc2Gain = this.osc2Gain.value);
-        var actOsc2Val = function() {
-            this.el.querySelectorAll(".osc2-type button").forEach((el) => el.classList.remove("selected"));
-            this.el.querySelector(".osc2-type button[data-value='" + this.track.osc2Type + "']").classList.add("selected");
-        }.bind(this);
-        this.on("dom:click .osc2-type button", function(e) {
-            this.track.osc2Type = e.target.dataset.value;
-            actOsc2Val();
-        }.bind(this));
-        actOsc2Val();
+        this.osc2Type = new saisynth.ButtonSelect([["sine", "sine"], 
+            ["square", "square"],
+            ["triangle", "triangle"],
+            ["sawtooth", "sawtooth"],
+            ["noise", "noise"]]).appendTo(this.el.querySelector(".osc2-type"));
+        this.osc2Type.on("change:value", () => this.track.osc2Type = this.osc2Type.value);
         
         var receiveMessage = function(mes) {
             console.log("midi message", mes.cmdString, mes);
             this.track.midiMessage(mes);
-            this.keys.receiveMidiMessage(mes);
+            this.keys.midiMessage(mes);
         }.bind(this);
         
         this.midiReceiver = new saisynth.MidiReceiver();

@@ -78,3 +78,16 @@
         cursor: pointer;
     }
 }
+
+.button-select {
+    button {
+        &:active, &:hover, &:focus, &:visited {
+            background-color: @btn-default-bg !important;
+            border-color: @btn-default-border !important;
+            outline: none !important;
+        }
+        &.selected {
+            background-color: @btn-primary-bg !important;
+        }
+    }
+}

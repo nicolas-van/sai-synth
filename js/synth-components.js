@@ -263,7 +263,7 @@ saisynth.Keys = class Keys extends widget.Widget {
         mes.note = note;
         this.trigger("midiMessage", mes);
     }
-    receiveMidiMessage(mes) {
+    midiMessage(mes) {
         if (mes.cmd === sai.MidiMessage.commands.noteOn) {
             if (this.notes[mes.note])
                 this.notes[mes.note].addClass("pressed");
@@ -271,6 +271,32 @@ saisynth.Keys = class Keys extends widget.Widget {
             if (this.notes[mes.note])
                 this.notes[mes.note].removeClass("pressed");
         }
+    }
+}
+
+saisynth.ButtonSelect = class ButtonSelect extends widget.Widget {
+    get tagName() { return "span"; }
+    get className() { return "button-select btn-group"; }
+    get attributes() { return { "role": "group" }; }
+    constructor(values) {
+        super();
+        this._values = values;
+        this.el.innerHTML = tenv.renderString(`
+            {% for val in values %}
+            <button type="button" class="btn btn-default" data-value="{{ val[0] }}">{{ val[1] | safe }}</button>
+            {% endfor %}
+        `, {values: values});
+        this.value = values[0][0];
+        this.on("dom:click button", (e) => this.value = e.target.dataset.value);
+    }
+    get value() {
+        return this._value;
+    }
+    set value(val) {
+        this._value = val;
+        this.el.querySelectorAll("button").forEach((el) => el.classList.remove("selected"));
+        this.el.querySelector("button[data-value='" + val + "']").classList.add("selected");
+        this.trigger("change:value");
     }
 }
 
