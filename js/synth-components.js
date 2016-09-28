@@ -220,8 +220,8 @@ saisynth.Keys = class Keys extends widget.Widget {
         y = (y / $(this.el).height()) * 100;
         for (var i = 0; i < this.keysList.length; i++) {
             var k = this.keysList[i];
-            if (x >= parseInt(k.attr("x")) && x <= parseInt(k.attr("x")) + parseInt(k.attr("width")) &&
-                y >= parseInt(k.attr("y")) && y <= parseInt(k.attr("y")) + parseInt(k.attr("height")))
+            if (x >= parseFloat(k.attr("x")) && x <= parseFloat(k.attr("x")) + parseFloat(k.attr("width")) &&
+                y >= parseFloat(k.attr("y")) && y <= parseFloat(k.attr("y")) + parseFloat(k.attr("height")))
                 return k.note;
         }
         return null;
