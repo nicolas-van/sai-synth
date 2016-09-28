@@ -119,7 +119,7 @@ saisynth.Keys = class Keys extends widget.Widget {
     get attributes() { return {"style": "display: inline-block; position: relative; width: 640px; height: 100px;"}; }
     constructor() {
         super();
-        this._firstNote = 69 - 9;
+        this._firstNote = (69 - 9) - (12 * 2);
         this._keys = 49;
         this.fingers = {};
         this.el.innerHTML = `
