@@ -143,6 +143,8 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.keys = new saisynth.Keys().appendTo(this.el.querySelector(".keys-container"));
         this.keys.width = "100%";
         this.keys.height = "100%";
+        this.keys.firstNote = 69 - 9 - 12;
+        this.keys.keys = 25;
         this.keys.on("midiMessage", (e) => receiveMessage(e.detail));
     }
 };
