@@ -6,15 +6,13 @@ var tenv = saisynth._tenv;
 
 saisynth.Knob = class Knob extends widget.Widget {
     get className() { return "knob"; }
-    render() {
-        return tenv.renderString(`
+    constructor(defaultValue, min, max, mode) {
+        super();
+        this.el.innerHTML = tenv.renderString(`
             <div class="knob-circle">
                 <div class="knob-bar"></div>
             </div>
         `);
-    }
-    constructor(defaultValue, min, max, mode) {
-        super();
         this._value = defaultValue === undefined ? 0 : defaultValue;
         this._defaultValue = defaultValue === undefined ? 0 : defaultValue;
         this._min = min === undefined ? 0 : min;
@@ -29,6 +27,7 @@ saisynth.Knob = class Knob extends widget.Widget {
             "dom:dblclick": () => this.value = this.defaultValue,
         });
         this.value = this._value;
+        
     }
     get value() {
         return this._value;
