@@ -1,31 +1,11 @@
 
 .knob {
     @knob-size: 50px;
-    @knob-border-width: 2px;
-    @knob-color: @brand-primary;
     
     width: @knob-size;
     height: @knob-size;
     display: inline-block;
     position: relative;
-    text-align: left;
-    
-    .knob-circle {
-        display: inline-block;
-        position: absolute;
-        width: @knob-size;
-        height: @knob-size;
-        border: @knob-border-width solid @knob-color;
-        border-radius: @knob-size / 2;
-    }
-    
-    .knob-bar {
-        margin-left: auto;
-        margin-right: auto;
-        width: @knob-border-width;
-        height: @knob-size / 2;
-        background-color: @knob-color;
-    }
 }
 
 .keys-container {

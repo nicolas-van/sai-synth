@@ -9,10 +9,20 @@ saisynth.Knob = class Knob extends widget.Widget {
     constructor(defaultValue, min, max, mode) {
         super();
         this.el.innerHTML = tenv.renderString(`
-            <div class="knob-circle">
-                <div class="knob-bar"></div>
-            </div>
+            <svg width="100%" height="100%" viewBox="0 0 10 10" preserveAspectRatio="none"></svg>
         `);
+        this._s = Snap(this.el.querySelector('svg'));
+        var c = this._s.circle(5, 5, 4.3).attr({
+            "stroke": "#2A9FD6",
+            "strokeWidth": 0.5,
+        });
+        var l = this._s.line(5, 1.7, 5, 5).attr({
+            "stroke": "#2A9FD6",
+            "strokeWidth": 0.5,
+            "strokeLinecap": "round",
+        });
+        this._svgKnob = this._s.group(c, l);
+        
         this._value = defaultValue === undefined ? 0 : defaultValue;
         this._defaultValue = defaultValue === undefined ? 0 : defaultValue;
         this._min = min === undefined ? 0 : min;
@@ -83,7 +93,8 @@ saisynth.Knob = class Knob extends widget.Widget {
     }
     _iValueChange() {
         var degrees = (this.iValue * (135 * 2)) - 135;
-        this.el.querySelector(".knob-circle").style.transform = "rotate(" + degrees + "deg)";
+        this._svgKnob.transform('rotate(' + degrees + ', 5, 5)');
+        //this.el.querySelector(".knob-circle").style.transform = "rotate(" + degrees + "deg)";
         if (this._updatingValue)
             return;
         this._updatingIValue = true;
