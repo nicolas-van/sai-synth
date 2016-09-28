@@ -78,7 +78,7 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.track.release = 0.3;
         
         // osc1
-        this.osc1Gain = new saisynth.Knob(this.track.osc1Gain, 0, 1, "exponential").
+        this.osc1Gain = new saisynth.Knob(this.track.osc1Gain, 0, 0.25, "exponential").
             appendTo(this.el.querySelector(".osc1-gain .knob-ctn"));
         this.osc1Gain.on("change:value", () => this.track.osc1Gain = this.osc1Gain.value);
         this.osc1Type = new saisynth.ButtonSelect([["sine", "sine"], 
@@ -89,7 +89,7 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.osc1Type.on("change:value", () => this.track.osc1Type = this.osc1Type.value);
         
         // osc2
-        this.osc2Gain = new saisynth.Knob(this.track.osc2Gain, 0, 1, "exponential").
+        this.osc2Gain = new saisynth.Knob(this.track.osc2Gain, 0, 0.25, "exponential").
             appendTo(this.el.querySelector(".osc2-gain .knob-ctn"));
         this.osc2Gain.on("change:value", () => this.track.osc2Gain = this.osc2Gain.value);
         this.osc2Type = new saisynth.ButtonSelect([["sine", "sine"], 
