@@ -121,7 +121,7 @@ saisynth.Keys = class Keys extends widget.Widget {
         super();
         this._firstNote = (69 - 9) - (12 * 2);
         this._keys = 49;
-        this.fingers = {};
+        this._fingers = {};
         this.el.innerHTML = `
             <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
             <div class="keyboad-overlay" style="position: absolute; top: 0; bottom: 0; right: 0;
@@ -184,8 +184,8 @@ saisynth.Keys = class Keys extends widget.Widget {
         var nbrWhites = _.range(start, stop).reduce((c, x) => whites.has(x % 12) ? c + 1 : c, 0);
         var whiteStep = 100. / nbrWhites;
         var pos = 0;
-        this.notes = {};
-        this.keysList = [];
+        this._notes = {};
+        this._keysList = [];
         _.range(start, stop).forEach(function(note) {
             if (whites.has(note % 12)) {
                 var w = this._s.rect(pos, 0, whiteStep, 100).attr({
@@ -197,8 +197,8 @@ saisynth.Keys = class Keys extends widget.Widget {
                 w.note = note;
                 w.color = w.attr("fill");
                 w.pcolor= "#9EDFFF";
-                this.notes[note] = w;
-                this.keysList.push(w);
+                this._notes[note] = w;
+                this._keysList.push(w);
                 if (whites.has((note + 1) % 12)) {
                     pos += whiteStep;
                 } else {
@@ -209,8 +209,8 @@ saisynth.Keys = class Keys extends widget.Widget {
                 b.note = note;
                 b.color = b.attr("fill");
                 b.pcolor = "#007DB9";
-                this.notes[note] = b;
-                this.keysList.unshift(b);
+                this._notes[note] = b;
+                this._keysList.unshift(b);
                 pos += whiteStep * 0.30;
             }
         }.bind(this));
@@ -218,8 +218,8 @@ saisynth.Keys = class Keys extends widget.Widget {
     findNote(x, y) {
         x = (x / $(this.el).width()) * 100;
         y = (y / $(this.el).height()) * 100;
-        for (var i = 0; i < this.keysList.length; i++) {
-            var k = this.keysList[i];
+        for (var i = 0; i < this._keysList.length; i++) {
+            var k = this._keysList[i];
             if (x >= parseFloat(k.attr("x")) && x <= parseFloat(k.attr("x")) + parseFloat(k.attr("width")) &&
                 y >= parseFloat(k.attr("y")) && y <= parseFloat(k.attr("y")) + parseFloat(k.attr("height")))
                 return k.note;
@@ -227,10 +227,10 @@ saisynth.Keys = class Keys extends widget.Widget {
         return null;
     }
     finger(num) {
-        if (! (("" + num) in this.fingers)) {
-            this.fingers[num] = {current: null};
+        if (! (("" + num) in this._fingers)) {
+            this._fingers[num] = {current: null};
         }
-        return this.fingers[num];
+        return this._fingers[num];
     }
     calcMouse(e) {
         var finger = this.finger(0);
@@ -272,7 +272,7 @@ saisynth.Keys = class Keys extends widget.Widget {
         var touches = _.map(e.originalEvent.touches, function(touch) {
             return "" + touch.identifier;
         });
-        _.each(this.fingers, _.bind(function(finger, id) {
+        _.each(this._fingers, _.bind(function(finger, id) {
             if (! _.contains(touches, id) && finger.current !== null) {
                 this._noteReleased(finger.current);
                 finger.current = null;
@@ -293,7 +293,7 @@ saisynth.Keys = class Keys extends widget.Widget {
         this.trigger("midiMessage", mes);
     }
     midiMessage(mes) {
-        var note = this.notes[mes.note];
+        var note = this._notes[mes.note];
         if (! note)
             return;
         if (mes.cmd === sai.MidiMessage.commands.noteOn) {
