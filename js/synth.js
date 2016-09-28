@@ -66,6 +66,7 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
                     <label>Gain</label>
                 </div>
             </div>
+            <div class="keys-container"></div>
         `);
         
         this.audioCtx = new AudioContext();
@@ -139,7 +140,9 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.midiReceiver.on("midiMessage", (e) => receiveMessage(e.detail));
         
         // creation of virtual keyboard
-        this.keys = new saisynth.Keys().appendTo(this.el);
+        this.keys = new saisynth.Keys().appendTo(this.el.querySelector(".keys-container"));
+        this.keys.width = "100%";
+        this.keys.height = "100%";
         this.keys.on("midiMessage", (e) => receiveMessage(e.detail));
     }
 };

@@ -19,6 +19,7 @@
     "widget": "~1.1.0",
     "lodash": "~4.13.1",
     "nunjucks": "~2.4.2",
-    "bootstrap": "~3.3.6"
+    "bootstrap": "~3.3.6",
+    "Snap.svg": "snap.svg#~0.4.1"
   }
 }

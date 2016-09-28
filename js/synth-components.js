@@ -116,13 +116,18 @@ var hasTouch = function() {
 
 saisynth.Keys = class Keys extends widget.Widget {
     get className() { return "keys"; }
-    constructor(options) {
+    get attributes() { return {"style": "display: inline-block; position: relative; width: 640px; height: 100px;"}; }
+    constructor() {
         super();
-        this._options = _.defaults(options, {
-            width: 640,
-            height: 100,
-        });
+        this._firstNote = 69 - 9;
+        this._keys = 49;
         this.fingers = {};
+        this.el.innerHTML = `
+            <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            <div class="keyboad-overlay" style="position: absolute; top: 0; bottom: 0; right: 0;
+                left: 0; cursor: pointer;"></div>
+        `;
+        this._s = Snap(this.el.querySelector('svg'));
         this.on({
             "appendedToDom": this.apply,
         });
@@ -142,69 +147,82 @@ saisynth.Keys = class Keys extends widget.Widget {
             });
         }
     }
+    get width() {
+        return this.el.style.width;
+    }
+    set width(val) {
+        this.el.style.width = val;
+    }
+    get height() {
+        return this.el.style.height;
+    }
+    set height(val) {
+        this.el.style.height = val;
+    }
+    get firstNote() {
+        return this._firstNote;
+    }
+    set firstNote(val) {
+        this._firstNote = val;
+        this.apply();
+    }
+    get keys() {
+        return this._keys;
+    }
+    set keys(val) {
+        this._keys = val;
+        this.apply();
+    }
     apply() {
-        var width = this._options.width;
-        var height = this._options.height;
-        this.el.style.width = "" + width + "px";
-        this.el.style.height = "" + height + "px";
-        var nbrWhite = 7 * 6;
-        var blackHProp = 0.6;
-        var blackWProp = 0.65;
-        var offset = 0;
-        var firstNote = 69 - 9 - (12 * 2);
-
-        var kwidth = width / nbrWhite;
-        var kheight = height;
-        var bkwidth = kwidth * blackWProp;
-        var bkheight = kheight * blackHProp;
+        if (! this.appendedToDom)
+            return;
+        this.el.querySelector('svg').innerHTML = "";
+        var whites = new Set([0, 2, 4, 5, 7, 9, 11]);
+        
+        var start = this.firstNote;
+        var stop = this.firstNote + this.keys;
+        var nbrWhites = _.range(start, stop).reduce((c, x) => whites.has(x % 12) ? c + 1 : c, 0);
+        var whiteStep = 100. / nbrWhites;
         var pos = 0;
-        var note = firstNote;
-        var blacks = [];
-        var whites = [];
         this.notes = {};
-        _.each(_.range(nbrWhite), function(i) {
-            var k = $("<div></div>");
-            k.css("top", 0);
-            k.css("left", pos);
-            k.data("left", pos);
-            k.css("width", kwidth);
-            k.css("height", kheight);
-            k.addClass("white");
-            k.data("note", note);
-            if (note % 12 === (69 - 9) % 12) {
-                k.append($("<span></span>").text(Math.floor(note / 12) - 1));
+        this.keysList = [];
+        _.range(start, stop).forEach(function(note) {
+            if (whites.has(note % 12)) {
+                var w = this._s.rect(pos, 0, whiteStep, 100).attr({
+                    "fill": "white",
+                    "stroke": "black",
+                    "strokeWidth": 0.1,
+                });
+                this._s.prepend(w);
+                w.note = note;
+                w.color = w.attr("fill");
+                w.pcolor= "#9EDFFF";
+                this.notes[note] = w;
+                this.keysList.push(w);
+                if (whites.has((note + 1) % 12)) {
+                    pos += whiteStep;
+                } else {
+                    pos += whiteStep * 0.70;
+                }
+            } else {
+                var b = this._s.rect(pos, 0, whiteStep * 0.60, 60).attr("fill", "black");
+                b.note = note;
+                b.color = b.attr("fill");
+                b.pcolor = "#007DB9";
+                this.notes[note] = b;
+                this.keysList.unshift(b);
+                pos += whiteStep * 0.30;
             }
-            $(this.el).append(k);
-            whites.push(k);
-            this.notes[note] = k;
-            note += 1;
-
-            if (_.includes([0, 1, 3, 4, 5], (i + offset) % 7)) {
-                k = $("<div></div>");
-                k.css("top", 0);
-                k.css("left", pos + kwidth - (bkwidth / 2));
-                k.data("left", pos + kwidth - (bkwidth / 2));
-                k.css("width", bkwidth);
-                k.css("height", bkheight);
-                k.addClass("black");
-                k.data("note", note);
-                $(this.el).append(k);
-                blacks.push(k);
-                this.notes[note] = k;
-                note += 1;
-            }
-
-            pos += kwidth;
         }.bind(this));
-        this.keys = [].concat(blacks).concat(whites);
-        $(this.el).append($("<div></div>").addClass("keyboad-overlay"));
     }
     findNote(x, y) {
-        for (var i = 0; i < this.keys.length; i++) {
-            var k = this.keys[i];
-            if (x >= k.data("left") && x <= k.data("left") + k.outerWidth() &&
-                y >= 0 && y <= k.outerHeight())
-                return k.data("note");
+        x = (x / $(this.el).width()) * 100;
+        y = (y / $(this.el).height()) * 100;
+        for (var i = 0; i < this.keysList.length; i++) {
+            var k = this.keysList[i];
+            if (x >= parseInt(k.attr("x")) && x <= parseInt(k.attr("x")) + parseInt(k.attr("width")) &&
+                y >= parseInt(k.attr("y")) && y <= parseInt(k.attr("y")) + parseInt(k.attr("height")))
+                return k.note;
         }
         return null;
     }
@@ -275,12 +293,13 @@ saisynth.Keys = class Keys extends widget.Widget {
         this.trigger("midiMessage", mes);
     }
     midiMessage(mes) {
+        var note = this.notes[mes.note];
+        if (! note)
+            return;
         if (mes.cmd === sai.MidiMessage.commands.noteOn) {
-            if (this.notes[mes.note])
-                this.notes[mes.note].addClass("pressed");
+            note.attr("fill", note.pcolor);
         } else if (mes.cmd === sai.MidiMessage.commands.noteOff) {
-            if (this.notes[mes.note])
-                this.notes[mes.note].removeClass("pressed");
+            note.attr("fill", note.color);
         }
     }
 }
