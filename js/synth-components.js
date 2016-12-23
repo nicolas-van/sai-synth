@@ -328,7 +328,7 @@ saisynth.ButtonSelect = class ButtonSelect extends widget.Widget {
             {% endfor %}
         `, {values: values});
         this.value = values[0][0];
-        this.on("dom:click button", (e) => this.value = e.target.dataset.value);
+        this.on("dom:click button", (e) => this.value = e.bindedTarget.dataset.value);
     }
     get value() {
         return this._value;

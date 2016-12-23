@@ -81,22 +81,22 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.osc1Gain = new saisynth.Knob(this.track.osc1Gain, 0, 0.25, "exponential").
             appendTo(this.el.querySelector(".osc1-gain .knob-ctn"));
         this.osc1Gain.on("change:value", () => this.track.osc1Gain = this.osc1Gain.value);
-        this.osc1Type = new saisynth.ButtonSelect([["sine", "sine"], 
-            ["square", "square"],
-            ["triangle", "triangle"],
-            ["sawtooth", "sawtooth"],
-            ["noise", "noise"]]).appendTo(this.el.querySelector(".osc1-type"));
+        this.osc1Type = new saisynth.ButtonSelect([["sine", sineHtml()], 
+            ["square", squareHtml()],
+            ["triangle", triangleHtml()],
+            ["sawtooth", sawHtml()],
+            ["noise", noiseHtml()]]).appendTo(this.el.querySelector(".osc1-type"));
         this.osc1Type.on("change:value", () => this.track.osc1Type = this.osc1Type.value);
         
         // osc2
         this.osc2Gain = new saisynth.Knob(this.track.osc2Gain, 0, 0.25, "exponential").
             appendTo(this.el.querySelector(".osc2-gain .knob-ctn"));
         this.osc2Gain.on("change:value", () => this.track.osc2Gain = this.osc2Gain.value);
-        this.osc2Type = new saisynth.ButtonSelect([["sine", "sine"], 
-            ["square", "square"],
-            ["triangle", "triangle"],
-            ["sawtooth", "sawtooth"],
-            ["noise", "noise"]]).appendTo(this.el.querySelector(".osc2-type"));
+        this.osc2Type = new saisynth.ButtonSelect([["sine", sineHtml()], 
+            ["square", squareHtml()],
+            ["triangle", triangleHtml()],
+            ["sawtooth", sawHtml()],
+            ["noise", noiseHtml()]]).appendTo(this.el.querySelector(".osc2-type"));
         this.osc2Type.on("change:value", () => this.track.osc2Type = this.osc2Type.value);
         
         // envelope
@@ -187,6 +187,81 @@ saisynth.MidiReceiver = class MidiReceiver extends widget.EventDispatcher {
         });
         super.destroy();
     }
+};
+
+function squareHtml() {
+    var el = document.createElement("div");
+    el.innerHTML = tenv.renderString(`
+        <svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+            style="margin-top: 2px; margin-bottom: -3px;"></svg>
+    `);
+    var _s = Snap(el.querySelector('svg'));
+    var c = _s.path("M 1 1 L 7.5 1 L 7.5 9 L 14 9").attr({
+        fill: "none",
+        "stroke": "#bbbbbb",
+        "strokeWidth": 2,
+    });
+    return el.innerHTML;
+};
+
+function sineHtml() {
+    var el = document.createElement("div");
+    el.innerHTML = tenv.renderString(`
+        <svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+            style="margin-top: 2px; margin-bottom: -3px;"></svg>
+    `);
+    var _s = Snap(el.querySelector('svg'));
+    var c = _s.path("M 1 5 C 1 0, 7.5 0, 7.5 5 S 14 10, 14 5").attr({
+        fill: "none",
+        "stroke": "#bbbbbb",
+        "strokeWidth": 2,
+    });
+    return el.innerHTML;
+};
+
+function triangleHtml() {
+    var el = document.createElement("div");
+    el.innerHTML = tenv.renderString(`
+        <svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+            style="margin-top: 2px; margin-bottom: -3px;"></svg>
+    `);
+    var _s = Snap(el.querySelector('svg'));
+    var c = _s.path("M 1 9 L 7.5 1 L 14 9").attr({
+        fill: "none",
+        "stroke": "#bbbbbb",
+        "strokeWidth": 2,
+    });
+    return el.innerHTML;
+};
+
+function sawHtml() {
+    var el = document.createElement("div");
+    el.innerHTML = tenv.renderString(`
+        <svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+            style="margin-top: 2px; margin-bottom: -3px;"></svg>
+    `);
+    var _s = Snap(el.querySelector('svg'));
+    var c = _s.path("M 1 9 L 14 1 L 14 9").attr({
+        fill: "none",
+        "stroke": "#bbbbbb",
+        "strokeWidth": 2,
+    });
+    return el.innerHTML;
+};
+
+function noiseHtml() {
+    var el = document.createElement("div");
+    el.innerHTML = tenv.renderString(`
+        <svg width="24px" height="16px" viewBox="0 0 10 10" preserveAspectRatio="none"
+            style="margin-top: 2px; margin-bottom: -3px;"></svg>
+    `);
+    var _s = Snap(el.querySelector('svg'));
+    var c = _s.path("M 1 5 L 2 3 L 2 7 L 3 4 L 3 6 L 4 2 L 4 8 L 5 1 L 5 9 L 6 2 L 6 8 L 7 4 L 7 6 L 8 3 L 8 7 L 9 5").attr({
+        fill: "none",
+        "stroke": "#bbbbbb",
+        "strokeWidth": 0.4,
+    });
+    return el.innerHTML;
 };
 
 })();
