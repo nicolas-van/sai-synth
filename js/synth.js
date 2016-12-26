@@ -60,6 +60,22 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
                     <label>Osc2Gain</label>
                 </div>
             </div>
+            <div class="filter">
+                <span class="filter-type">
+                </span>
+                <div class="filter-detune knob-label">
+                    <div class="knob-ctn"></div>
+                    <label>Filter Detune</label>
+                </div>
+                <div class="filter-q knob-label">
+                    <div class="knob-ctn"></div>
+                    <label>Filter Q</label>
+                </div>
+                <div class="filter-gain knob-label">
+                    <div class="knob-ctn"></div>
+                    <label>Filter Gain</label>
+                </div>
+            </div>
             <div class="general">
                 <div class="gain knob-label">
                     <div class="knob-ctn"></div>
@@ -81,22 +97,24 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.osc1Gain = new saisynth.Knob(this.track.osc1Gain, 0, 0.25, "exponential").
             appendTo(this.el.querySelector(".osc1-gain .knob-ctn"));
         this.osc1Gain.on("change:value", () => this.track.osc1Gain = this.osc1Gain.value);
-        this.osc1Type = new saisynth.ButtonSelect([["sine", sineHtml()], 
-            ["square", squareHtml()],
-            ["triangle", triangleHtml()],
-            ["sawtooth", sawHtml()],
-            ["noise", noiseHtml()]]).appendTo(this.el.querySelector(".osc1-type"));
+        this.osc1Type = new saisynth.ButtonSelect([["sine", sineHtml], 
+            ["square", squareHtml],
+            ["triangle", triangleHtml],
+            ["sawtooth", sawHtml],
+            ["noise", noiseHtml]]).appendTo(this.el.querySelector(".osc1-type"));
+        this.osc1Type.value = this.track.osc1Type;
         this.osc1Type.on("change:value", () => this.track.osc1Type = this.osc1Type.value);
         
         // osc2
         this.osc2Gain = new saisynth.Knob(this.track.osc2Gain, 0, 0.25, "exponential").
             appendTo(this.el.querySelector(".osc2-gain .knob-ctn"));
         this.osc2Gain.on("change:value", () => this.track.osc2Gain = this.osc2Gain.value);
-        this.osc2Type = new saisynth.ButtonSelect([["sine", sineHtml()], 
-            ["square", squareHtml()],
-            ["triangle", triangleHtml()],
-            ["sawtooth", sawHtml()],
-            ["noise", noiseHtml()]]).appendTo(this.el.querySelector(".osc2-type"));
+        this.osc2Type = new saisynth.ButtonSelect([["sine", sineHtml], 
+            ["square", squareHtml],
+            ["triangle", triangleHtml],
+            ["sawtooth", sawHtml],
+            ["noise", noiseHtml]]).appendTo(this.el.querySelector(".osc2-type"));
+        this.osc2Type.value = this.track.osc2Type;
         this.osc2Type.on("change:value", () => this.track.osc2Type = this.osc2Type.value);
         
         // envelope
@@ -123,6 +141,23 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.lfoOsc2Gain = new saisynth.Knob(this.track.lfoOsc2Gain, 0, 400, "exponential").
             appendTo(this.el.querySelector(".lfo-osc2-gain .knob-ctn"));
         this.lfoOsc2Gain.on("change:value", () => this.track.lfoOsc2Gain = this.lfoOsc2Gain.value);
+        
+        // filter
+        this.filterType = new saisynth.ButtonSelect([["highpass", highpassHtml],
+            ["lowpass", lowpassHtml], 
+            ["bandpass", bandpassHtml],
+            ["notch", notchHtml]]).appendTo(this.el.querySelector(".filter-type"));
+        this.filterType.value = this.track.filterType;
+        this.filterType.on("change:value", () => this.track.filterType = this.filterType.value);
+        this.filterDetune = new saisynth.Knob(this.track.filterDetune, -10000, 10000, "normal").
+            appendTo(this.el.querySelector(".filter-detune .knob-ctn"));
+        this.filterDetune.on("change:value", () => this.track.filterDetune = this.filterDetune.value);
+        this.filterQ = new saisynth.Knob(this.track.filterQ, 1, 5000, "exponential").
+            appendTo(this.el.querySelector(".filter-q .knob-ctn"));
+        this.filterQ.on("change:value", () => this.track.filterQ = this.filterQ.value);
+        this.filterGain = new saisynth.Knob(this.track.filterGain, 0, 1, "exponential").
+            appendTo(this.el.querySelector(".filter-gain .knob-ctn"));
+        this.filterGain.on("change:value", () => this.track.filterGain = this.filterGain.value);
         
         // gain
         this.gain = new saisynth.Knob(this.track.gain, 0, 8, "exponential").
@@ -189,79 +224,67 @@ saisynth.MidiReceiver = class MidiReceiver extends widget.EventDispatcher {
     }
 };
 
-function squareHtml() {
-    var el = document.createElement("div");
-    el.innerHTML = tenv.renderString(`
-        <svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
-            style="margin-top: 2px; margin-bottom: -3px;"></svg>
-    `);
-    var _s = Snap(el.querySelector('svg'));
-    var c = _s.path("M 1 1 L 7.5 1 L 7.5 9 L 14 9").attr({
-        fill: "none",
-        "stroke": "#bbbbbb",
-        "strokeWidth": 2,
-    });
-    return el.innerHTML;
-};
+var sineHtml = `
+<svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+    style="margin-top: 2px; margin-bottom: -3px;">
+    <path d="M 1 5 C 1 0, 7.5 0, 7.5 5 S 14 10, 14 5" fill="none" stroke="#bbbbbb" style="stroke-width: 2;"></path>
+</svg>
+`;
 
-function sineHtml() {
-    var el = document.createElement("div");
-    el.innerHTML = tenv.renderString(`
-        <svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
-            style="margin-top: 2px; margin-bottom: -3px;"></svg>
-    `);
-    var _s = Snap(el.querySelector('svg'));
-    var c = _s.path("M 1 5 C 1 0, 7.5 0, 7.5 5 S 14 10, 14 5").attr({
-        fill: "none",
-        "stroke": "#bbbbbb",
-        "strokeWidth": 2,
-    });
-    return el.innerHTML;
-};
+var squareHtml = `
+<svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+    style="margin-top: 2px; margin-bottom: -3px;">
+    <path d="M 1 1 L 7.5 1 L 7.5 9 L 14 9" fill="none" stroke="#bbbbbb" style="stroke-width: 2;"></path>
+</svg>
+`;
 
-function triangleHtml() {
-    var el = document.createElement("div");
-    el.innerHTML = tenv.renderString(`
-        <svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
-            style="margin-top: 2px; margin-bottom: -3px;"></svg>
-    `);
-    var _s = Snap(el.querySelector('svg'));
-    var c = _s.path("M 1 9 L 7.5 1 L 14 9").attr({
-        fill: "none",
-        "stroke": "#bbbbbb",
-        "strokeWidth": 2,
-    });
-    return el.innerHTML;
-};
+var triangleHtml = `
+<svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+    style="margin-top: 2px; margin-bottom: -3px;">
+    <path d="M 1 9 L 7.5 1 L 14 9" fill="none" stroke="#bbbbbb" style="stroke-width: 2;"></path>
+</svg>`;
 
-function sawHtml() {
-    var el = document.createElement("div");
-    el.innerHTML = tenv.renderString(`
-        <svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
-            style="margin-top: 2px; margin-bottom: -3px;"></svg>
-    `);
-    var _s = Snap(el.querySelector('svg'));
-    var c = _s.path("M 1 9 L 14 1 L 14 9").attr({
-        fill: "none",
-        "stroke": "#bbbbbb",
-        "strokeWidth": 2,
-    });
-    return el.innerHTML;
-};
+var sawHtml = `
+<svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+    style="margin-top: 2px; margin-bottom: -3px;">
+    <path d="M 1 9 L 14 1 L 14 9" fill="none" stroke="#bbbbbb" style="stroke-width: 2;"></path>
+</svg>
+`;
 
-function noiseHtml() {
-    var el = document.createElement("div");
-    el.innerHTML = tenv.renderString(`
-        <svg width="24px" height="16px" viewBox="0 0 10 10" preserveAspectRatio="none"
-            style="margin-top: 2px; margin-bottom: -3px;"></svg>
-    `);
-    var _s = Snap(el.querySelector('svg'));
-    var c = _s.path("M 1 5 L 2 3 L 2 7 L 3 4 L 3 6 L 4 2 L 4 8 L 5 1 L 5 9 L 6 2 L 6 8 L 7 4 L 7 6 L 8 3 L 8 7 L 9 5").attr({
-        fill: "none",
-        "stroke": "#bbbbbb",
-        "strokeWidth": 0.4,
-    });
-    return el.innerHTML;
-};
+var noiseHtml = `
+<svg width="24px" height="16px" viewBox="0 0 10 10" preserveAspectRatio="none"
+    style="margin-top: 2px; margin-bottom: -3px;">
+    <path d="M 1 5 L 2 3 L 2 7 L 3 4 L 3 6 L 4 2 L 4 8 L 5 1 L 5 9 L 6 2 L 6 8 L 7 4 L 7 6 L 8 3 L 8 7 L 9 5"
+        fill="none" stroke="#bbbbbb" style="stroke-width: 0.4;"></path>
+</svg>
+`;
+
+var highpassHtml = `
+<svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+    style="margin-top: 2px; margin-bottom: -3px;">
+    <path d="M 1 9 L 4 9 C 5 9, 7.5 6, 7.5 5 S 10 1, 11 1 L 14 1" fill="none" stroke="#bbbbbb" style="stroke-width: 2;"></path>
+</svg>
+`;
+
+var lowpassHtml = `
+<svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+    style="margin-top: 2px; margin-bottom: -3px;">
+    <path d="M 1 1 L 4 1 C 5 1, 7.5 4, 7.5 5 S 10 9, 11 9 L 14 9" fill="none" stroke="#bbbbbb" style="stroke-width: 2;"></path>
+</svg>
+`;
+
+var bandpassHtml = `
+<svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+    style="margin-top: 2px; margin-bottom: -3px;">
+    <path d="M 1 9 L 4 9 C 5 9, 6.5 1, 7.5 1 S 10 9, 11 9 L 14 9" fill="none" stroke="#bbbbbb" style="stroke-width: 2;"></path>
+</svg>
+`;
+
+var notchHtml = `
+<svg width="24px" height="16px" viewBox="0 0 15 10" preserveAspectRatio="none"
+    style="margin-top: 2px; margin-bottom: -3px;">
+    <path d="M 1 1 L 4 1 C 5 1, 6.5 9, 7.5 9 S 10 1, 11 1 L 14 1" fill="none" stroke="#bbbbbb" style="stroke-width: 2;"></path>
+</svg>
+`;
 
 })();

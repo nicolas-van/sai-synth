@@ -16,8 +16,9 @@
     <script src="js/synth-components.js"></script>
     <script>
         "use strict";
+        var synth;
         widget.ready(function() {
-            var synth = new saisynth.SaiSynth();
+            synth = new saisynth.SaiSynth();
             synth.appendTo(document.body);
         });
     </script>
