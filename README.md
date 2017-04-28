@@ -1,6 +1,6 @@
 # sai-synth
 
-An experimental substractive synthetiser using the Web Audio API.
+An experimental subtractive synthetiser using the Web Audio API.
 
 Currently should only work on Chrome.
 
