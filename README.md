@@ -1,5 +1,7 @@
 # sai-synth
 
+[![Build Status](https://travis-ci.org/nicolas-van/sai-synth.svg?branch=master)](https://travis-ci.org/nicolas-van/sai-synth)
+
 An experimental subtractive synthesizer using the Web Audio API.
 
 Currently should only work on Chrome.
