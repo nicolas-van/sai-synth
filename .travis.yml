@@ -2,13 +2,13 @@ language: node_js
 node_js: 10
 before_script:
   - npm run build
+before_deploy:
+  - PUBLIC_URL=https://nicolas-van.github.io/sai-synth/ npm run build
 deploy:
   provider: pages
   skip-cleanup: true
   github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
   keep-history: false
   local-dir: build
-  script:
-    - PUBLIC_URL=https://nicolas-van.github.io/sai-synth/ npm run build
   on:
     branch: master
