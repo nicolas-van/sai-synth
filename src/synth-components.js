@@ -1,10 +1,13 @@
 
-(function() {
-"use strict";
+import * as widget from 'widgetjs';
+import tenv from './tenv';
+import _ from 'lodash';
+import * as sai from 'sai-experiment';
+import $ from 'jquery';
 
-var tenv = saisynth._tenv;
+const Snap = require(`imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js`);
 
-saisynth.Knob = class Knob extends widget.Widget {
+export class Knob extends widget.Widget {
     get className() { return "knob"; }
     constructor(defaultValue, min, max, mode) {
         super();
@@ -65,7 +68,7 @@ saisynth.Knob = class Knob extends widget.Widget {
         return this._max;
     }
     set max(val) {
-        this._max = max;
+        this._max = val;
         this.trigger("change:max");
         this.value = this.value;
     }
@@ -101,7 +104,7 @@ saisynth.Knob = class Knob extends widget.Widget {
         var val = this.iValue;
         if (this.mode === "exponential")
             val = Math.pow(val, 2);
-        this.value = (this.iValue * (this.max - this.min)) + this.min;
+        this.value = (val * (this.max - this.min)) + this.min;
         this._updatingIValue = false;
     }
     _mouseDown(e) {
@@ -112,10 +115,10 @@ saisynth.Knob = class Knob extends widget.Widget {
         var moveCallback = function(e) {
             this.iValue = iValue + ((e.screenX - initialX) * mult) + ((initialY - e.screenY) * mult);
         }.bind(this);
-        var upCallback = function(e) {
+        var upCallback = (e) => {
             window.removeEventListener("mousemove", moveCallback);
             window.removeEventListener("mouseup", upCallback);
-        }.bind(this);
+        };
         window.addEventListener("mousemove", moveCallback);
         window.addEventListener("mouseup", upCallback);
     }
@@ -125,7 +128,7 @@ var hasTouch = function() {
     return 'ontouchstart' in window;
 };
 
-saisynth.Keys = class Keys extends widget.Widget {
+export class Keys extends widget.Widget {
     get className() { return "keys"; }
     get attributes() { return {"style": "display: inline-block; position: relative; width: 640px; height: 100px;"}; }
     constructor() {
@@ -199,14 +202,15 @@ saisynth.Keys = class Keys extends widget.Widget {
         this._keysList = [];
         _.range(start, stop).forEach(function(note) {
             if (whites.has(note % 12)) {
-                var w = this._s.rect(pos, 0, whiteStep, 100).attr({
+                var w = this._s.rect(pos, 0, whiteStep, 100);
+                w.attr({
                     "fill": "white",
                     "stroke": "black",
                     "strokeWidth": 0.1,
                 });
                 this._s.prepend(w);
                 w.note = note;
-                w.color = w.attr("fill");
+                w.color = "white";
                 w.pcolor= "#9EDFFF";
                 this._notes[note] = w;
                 this._keysList.push(w);
@@ -218,7 +222,7 @@ saisynth.Keys = class Keys extends widget.Widget {
             } else {
                 var b = this._s.rect(pos, 0, whiteStep * 0.60, 60).attr("fill", "black");
                 b.note = note;
-                b.color = b.attr("fill");
+                b.color = "black";
                 b.pcolor = "#007DB9";
                 this._notes[note] = b;
                 this._keysList.unshift(b);
@@ -271,7 +275,9 @@ saisynth.Keys = class Keys extends widget.Widget {
             var left = $(this.el).offset().left;
             var x = touch.pageX - left;
             var y = touch.pageY - top;
-            var note = this.findNote(x / pageScale, y / pageScale);
+            // TODO: fix, this variable
+            // var note = this.findNote(x / pageScale, y / pageScale);
+            var note = this.findNote(x, y);
             if (finger.current !== note) {
                 if (finger.current !== null)
                     this._noteReleased(finger.current);
@@ -315,7 +321,7 @@ saisynth.Keys = class Keys extends widget.Widget {
     }
 }
 
-saisynth.ButtonSelect = class ButtonSelect extends widget.Widget {
+export class ButtonSelect extends widget.Widget {
     get tagName() { return "span"; }
     get className() { return "button-select btn-group"; }
     get attributes() { return { "role": "group" }; }
@@ -340,6 +346,3 @@ saisynth.ButtonSelect = class ButtonSelect extends widget.Widget {
         this.trigger("change:value");
     }
 }
-
-
-})();

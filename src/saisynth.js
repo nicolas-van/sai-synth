@@ -1,13 +1,11 @@
-"use strict";
 
-(function() {
+import * as widget from 'widgetjs';
+import _ from 'lodash'
+import tenv from './tenv';
+import { Knob, Keys, ButtonSelect } from './synth-components';
+import * as sai from 'sai-experiment';
 
-window.saisynth = {};
-
-saisynth._tenv = new nunjucks.Environment(null, { autoescape: true });
-var tenv = saisynth._tenv;
-
-saisynth.SaiSynth = class SaiSynth extends widget.Widget {
+export class SaiSynth extends widget.Widget {
     get className() { return "sai-synth"; }
     constructor() {
         super();
@@ -85,10 +83,10 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.track.output.connect(this.audioCtx.destination);
         
         // osc1
-        this.osc1Gain = new saisynth.Knob(this.track.osc1Gain, 0, 0.25, "exponential").
-            appendTo(this.el.querySelector(".osc1-gain .knob-ctn"));
+        this.osc1Gain = new Knob(this.track.osc1Gain, 0, 0.25, "exponential")
+          .appendTo(this.el.querySelector(".osc1-gain .knob-ctn"));
         this.osc1Gain.on("change:value", () => this.track.osc1Gain = this.osc1Gain.value);
-        this.osc1Type = new saisynth.ButtonSelect([["sine", sineHtml], 
+        this.osc1Type = new ButtonSelect([["sine", sineHtml], 
             ["square", squareHtml],
             ["triangle", triangleHtml],
             ["sawtooth", sawHtml],
@@ -97,10 +95,10 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.osc1Type.on("change:value", () => this.track.osc1Type = this.osc1Type.value);
         
         // osc2
-        this.osc2Gain = new saisynth.Knob(this.track.osc2Gain, 0, 0.25, "exponential").
-            appendTo(this.el.querySelector(".osc2-gain .knob-ctn"));
+        this.osc2Gain = new Knob(this.track.osc2Gain, 0, 0.25, "exponential")
+          .appendTo(this.el.querySelector(".osc2-gain .knob-ctn"));
         this.osc2Gain.on("change:value", () => this.track.osc2Gain = this.osc2Gain.value);
-        this.osc2Type = new saisynth.ButtonSelect([["sine", sineHtml], 
+        this.osc2Type = new ButtonSelect([["sine", sineHtml], 
             ["square", squareHtml],
             ["triangle", triangleHtml],
             ["sawtooth", sawHtml],
@@ -109,63 +107,63 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
         this.osc2Type.on("change:value", () => this.track.osc2Type = this.osc2Type.value);
         
         // envelope
-        this.attack = new saisynth.Knob(this.track.attack, 0.01, 10, "exponential").
-            appendTo(this.el.querySelector(".attack .knob-ctn"));
+        this.attack = new Knob(this.track.attack, 0.01, 10, "exponential")
+          .appendTo(this.el.querySelector(".attack .knob-ctn"));
         this.attack.on("change:value", () => this.track.attack = this.attack.value);
-        this.decay = new saisynth.Knob(this.track.decay, 0.01, 10, "exponential").
-            appendTo(this.el.querySelector(".decay .knob-ctn"));
+        this.decay = new Knob(this.track.decay, 0.01, 10, "exponential")
+          .appendTo(this.el.querySelector(".decay .knob-ctn"));
         this.decay.on("change:value", () => this.track.decay = this.decay.value);
-        this.sustain = new saisynth.Knob(this.track.sustain, 0, 1, "exponential").
-            appendTo(this.el.querySelector(".sustain .knob-ctn"));
+        this.sustain = new Knob(this.track.sustain, 0, 1, "exponential")
+          .appendTo(this.el.querySelector(".sustain .knob-ctn"));
         this.sustain.on("change:value", () => this.track.sustain = this.sustain.value);
-        this.release = new saisynth.Knob(this.track.release, 0.01, 10, "exponential").
-            appendTo(this.el.querySelector(".release .knob-ctn"));
+        this.release = new Knob(this.track.release, 0.01, 10, "exponential")
+          .appendTo(this.el.querySelector(".release .knob-ctn"));
         this.release.on("change:value", () => this.track.release = this.release.value);
         
         // lfo
-        this.lfoType = new saisynth.ButtonSelect([["sine", sineHtml], 
+        this.lfoType = new ButtonSelect([["sine", sineHtml], 
             ["square", squareHtml],
             ["triangle", triangleHtml],
             ["sawtooth", sawHtml]]).appendTo(this.el.querySelector(".lfo-type"));
         this.lfoType.value = this.track.lfoType;
         this.lfoType.on("change:value", () => this.track.lfoType = this.lfoType.value);
-        this.lfoFrequency = new saisynth.Knob(this.track.lfoFrequency, 0.10, 20, "exponential").
-            appendTo(this.el.querySelector(".lfo-freq .knob-ctn"));
+        this.lfoFrequency = new Knob(this.track.lfoFrequency, 0.10, 20, "exponential")
+          .appendTo(this.el.querySelector(".lfo-freq .knob-ctn"));
         this.lfoFrequency.on("change:value", () => this.track.lfoFrequency = this.lfoFrequency.value);
-        this.lfoGain = new saisynth.Knob(this.track.lfoGain, 0, 400, "exponential").
-            appendTo(this.el.querySelector(".lfo-gain .knob-ctn"));
+        this.lfoGain = new Knob(this.track.lfoGain, 0, 400, "exponential")
+          .appendTo(this.el.querySelector(".lfo-gain .knob-ctn"));
         this.lfoGain.on("change:value", () => this.track.lfoGain = this.lfoGain.value);
-        this.lfoOscState = new saisynth.ButtonSelect([["on", "on"], 
+        this.lfoOscState = new ButtonSelect([["on", "on"], 
             ["off", "off"]]).appendTo(this.el.querySelector(".lfo-osc-state"));
-        this.lfoOscState.value = this.track.lfoOsc1Gain == 1 ? "on" : "off";
+        this.lfoOscState.value = this.track.lfoOsc1Gain === 1 ? "on" : "off";
         this.lfoOscState.on("change:value", function() {
-            this.track.lfoOsc1Gain = this.lfoOscState.value == "on" ? 1 : 0;
-            this.track.lfoOsc2Gain = this.lfoOscState.value == "on" ? 1 : 0;
+            this.track.lfoOsc1Gain = this.lfoOscState.value === "on" ? 1 : 0;
+            this.track.lfoOsc2Gain = this.lfoOscState.value === "on" ? 1 : 0;
         }.bind(this));
-        this.lfoFilterState = new saisynth.ButtonSelect([["on", "on"], 
+        this.lfoFilterState = new ButtonSelect([["on", "on"], 
             ["off", "off"]]).appendTo(this.el.querySelector(".lfo-filter-state"));
-        this.lfoFilterState.value = this.track.lfoFilterGain == 1 ? "on" : "off";
+        this.lfoFilterState.value = this.track.lfoFilterGain === 1 ? "on" : "off";
         this.lfoFilterState.on("change:value", function() {
-            this.track.lfoFilterGain = this.lfoFilterState.value == "on" ? 1 : 0;
+            this.track.lfoFilterGain = this.lfoFilterState.value === "on" ? 1 : 0;
         }.bind(this));
         
         // filter
-        this.filterType = new saisynth.ButtonSelect([["highpass", highpassHtml],
+        this.filterType = new ButtonSelect([["highpass", highpassHtml],
             ["lowpass", lowpassHtml], 
             ["bandpass", bandpassHtml],
             ["notch", notchHtml]]).appendTo(this.el.querySelector(".filter-type"));
         this.filterType.value = this.track.filterType;
         this.filterType.on("change:value", () => this.track.filterType = this.filterType.value);
-        this.filterDetune = new saisynth.Knob(this.track.filterDetune, -10000, 10000, "normal").
-            appendTo(this.el.querySelector(".filter-detune .knob-ctn"));
+        this.filterDetune = new Knob(this.track.filterDetune, -10000, 10000, "normal")
+          .appendTo(this.el.querySelector(".filter-detune .knob-ctn"));
         this.filterDetune.on("change:value", () => this.track.filterDetune = this.filterDetune.value);
-        this.filterQ = new saisynth.Knob(this.track.filterQ, 1, 100, "exponential").
-            appendTo(this.el.querySelector(".filter-q .knob-ctn"));
+        this.filterQ = new Knob(this.track.filterQ, 1, 100, "exponential")
+          .appendTo(this.el.querySelector(".filter-q .knob-ctn"));
         this.filterQ.on("change:value", () => this.track.filterQ = this.filterQ.value);
         
         // gain
-        this.gain = new saisynth.Knob(this.track.gain, 0, 8, "exponential").
-            appendTo(this.el.querySelector(".gain .knob-ctn"));
+        this.gain = new Knob(this.track.gain, 0, 8, "exponential")
+          .appendTo(this.el.querySelector(".gain .knob-ctn"));
         this.gain.on("change:value", () => this.track.gain = this.gain.value);
         
         var receiveMessage = function(mes) {
@@ -174,12 +172,12 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
             this.keys.midiMessage(mes);
         }.bind(this);
         
-        this.midiReceiver = new saisynth.MidiReceiver();
+        this.midiReceiver = new MidiReceiver();
         this.midiReceiver.parent = this;
         this.midiReceiver.on("midiMessage", (e) => receiveMessage(e.detail));
         
         // creation of virtual keyboard
-        this.keys = new saisynth.Keys().appendTo(this.el.querySelector(".keys-container"));
+        this.keys = new Keys().appendTo(this.el.querySelector(".keys-container"));
         this.keys.width = "100%";
         this.keys.height = "100%";
         this.keys.firstNote = 69 - 9 - 12;
@@ -188,7 +186,7 @@ saisynth.SaiSynth = class SaiSynth extends widget.Widget {
     }
 };
 
-saisynth.MidiReceiver = class MidiReceiver extends widget.EventDispatcher {
+export class MidiReceiver extends widget.EventDispatcher {
     constructor() {
         super();
         this._register();
@@ -290,5 +288,3 @@ var notchHtml = `
     <path d="M 1 1 L 4 1 C 5 1, 6.5 9, 7.5 9 S 10 1, 11 1 L 14 1" fill="none" stroke="#bbbbbb" style="stroke-width: 2;"></path>
 </svg>
 `;
-
-})();
