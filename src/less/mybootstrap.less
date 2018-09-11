@@ -1,7 +1,13 @@
 
-@import "bower_components/bootstrap/less/bootstrap.less";
+@import "~bootstrap/less/bootstrap";
 
-@icon-font-path: "./bower_components/bootstrap/fonts/";
+@icon-font-path: "~bootstrap/fonts/";
+
+.web-font(@path) {
+  @import (css) url("@{path}");
+}
+.web-font("https://fonts.googleapis.com/css?family=Share+Tech+Mono");
+.web-font("https://fonts.googleapis.com/css?family=Roboto:400,700");
 
 // Cyborg 3.3.5
 // Variables
@@ -47,7 +53,6 @@
 //
 //## Font, line-height, and color for body text, headings, and more.
 
-@import url(https://fonts.googleapis.com/css?family=Share+Tech+Mono);
 
 @font-family-sans-serif:  "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
 @font-family-serif:       Georgia, "Times New Roman", Times, serif;
@@ -876,8 +881,6 @@
 // Cyborg 3.3.5
 // Bootswatch
 // -----------------------------------------------------
-
-@import url("https://fonts.googleapis.com/css?family=Roboto:400,700");
 
 // Navbar =====================================================================
 
